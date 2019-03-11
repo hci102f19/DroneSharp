@@ -20,7 +20,6 @@ namespace DroneSharp.Model
         /// </summary>
         /// <param name="threshold1">The value of threshold 1</param>
         /// <param name="threshold2">The value of threshold 2</param>
-        /// <param name="image">The image to perform LineProcessing on</param>
         public LineProcessing(int threshold1, int threshold2)
         {
             Threshold1 = threshold1;
@@ -44,54 +43,70 @@ namespace DroneSharp.Model
         public int Theta { get; set; } = 150;
         public int LineMax { get; set; } = 100;
 
+        /// <summary>
+        /// Processes an image from the framebuffer
+        /// </summary>
+        /// <param name="timeToProcess">The time it took to process the frame</param>
+        /// <returns>The processed image</returns>
         public Mat ProcessImage(out long timeToProcess)
         {
-            Mat localframe = new Mat();
-            localframe = FrameBuffer.GetCurrentFrame();
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            if (localframe != null)
+            try
             {
-                Mat edges = new Mat();
-                using (localframe)
+                var localframe = FrameBuffer.GetCurrentFrame();
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                if (localframe != null && !localframe.IsEmpty)
                 {
-                    CvInvoke.Canny(localframe, edges, Threshold1, Threshold2 * 3);
+                    Mat edges = new Mat();
+                    using (localframe)
+                    {
+                        CvInvoke.Canny(localframe, edges, Threshold1, Threshold2 * 3);
+                    
+
+                    var vector = new VectorOfPointF();
+                    using (edges)
+                    {
+                        CvInvoke.HoughLines(edges, vector, 2, PiCircm, Theta);
+                        if (edges != null && !edges.IsEmpty)
+                        {
+                            if (CalculateTheta(vector))
+                            {
+                                Console.WriteLine("Too many lines");
+                                timeToProcess = sw.ElapsedMilliseconds;
+                                return null;
+                            }
+
+                            using (vector)
+                            {
+                                timeToProcess = sw.ElapsedMilliseconds;
+                                if (vector.Size == 0) return null;
+                                Mat imageWithLines = new Mat();
+                                imageWithLines = DrawLines(vector, localframe);
+                                sw.Stop();
+                                timeToProcess = sw.ElapsedMilliseconds;
+                                Mat frame = new Mat();
+                                imageWithLines.CopyTo(frame);
+                                return frame;
+                            }
+                        }
+                        else
+                        {
+                            throw new ArgumentNullException("Edges was returned as null");
+
+                        }
+                        }
+                        
+                    }
                 }
-
-                var vector = new VectorOfPointF();
-                using (edges)
+                else
                 {
-                    CvInvoke.HoughLines(edges, vector, 2, PiCircm, Threshold1);
-                    if (edges != null)
-                    {
-                        if (CalculateTheta(vector))
-                        {
-                            Console.WriteLine("Too many lines");
-                            timeToProcess = sw.ElapsedMilliseconds;
-                            return null;
-                        }
-
-                        using (vector)
-                        {
-                            Mat imageWithLines = new Mat();
-                            imageWithLines = DrawLines(vector, edges);
-                            sw.Stop();
-                            timeToProcess = sw.ElapsedMilliseconds;
-                            Mat frame = new Mat();
-                            imageWithLines.CopyTo(frame);
-                            return frame;
-                        }
-                    }
-                    else
-                    {
-                        throw new ArgumentNullException("Edges was returned as null");
-
-                    }
+                    throw new ArgumentNullException("Image has not been initialized");
                 }
             }
-            else
+            catch (Exception)
             {
-               throw new ArgumentNullException("Image has not been initialized");
+                Console.WriteLine("Processimage");
+                throw;
             }
         }
 
@@ -131,15 +146,15 @@ namespace DroneSharp.Model
 
             return image;
         }
-
+        /// <summary>
+        /// Modifies the theta value according to the number of lines in an image
+        /// </summary>
+        /// <param name="lines">A vector of lines in image</param>
+        /// <returns>A boolean value indicating if number of lines is larger than a specified line max</returns>
         private bool CalculateTheta(VectorOfPointF lines)
         {
             var modifier = 0;
-            if (Framecount == -1)
-            {
-                modifier = 1;
-            }
-            else
+            if (Framecount != -1 && lines.Size != 0)
             {
                 modifier = Framecount / lines.Size;
                 if (modifier <= 0)
@@ -147,20 +162,24 @@ namespace DroneSharp.Model
                     modifier = 1;
                 }
             }
+            else
+            {
+                modifier = 1;
+            }
 
             Framecount = lines.Size;
             if (lines.Size < 10 && Theta > ThetaModifier)
             {
                 Theta -= (int)Math.Round((double) (ThetaModifier * modifier), 0);
-                Console.WriteLine("Not enough data, decreasing theta to: " + Theta);
+                Console.WriteLine("Too much data, decreasing theta to: " + Theta);
             }
             else if(lines.Size > 50)
             {
                 Theta += (int) Math.Round((double) (ThetaModifier * modifier), 0);
-                Console.WriteLine("Too much data, increasing theta to: " + Theta);
+                Console.WriteLine("Not enough data, increasing theta to: " + Theta);
             }
 
-            return LineMax > lines.Size;
+            return LineMax < lines.Size;
         }
 
     }

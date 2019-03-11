@@ -14,39 +14,21 @@ using DroneSharp.Model;
 using Emgu.CV.Cuda;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
+using Emgu.CV.UI;
 using Emgu.CV.Util;
 namespace DroneSharp
 {
     class Program
     {
-        //Time vars
-        private static List<double> times = new List<double>();
-
         static void Main(string[] args)
         {
             ProcessHighPrio();
-            int count = 0;
             try
             {
-                VideoCapture capture = new VideoCapture(@"C:\Users\bstaf\Downloads/video.v2.mp4");
-                FrameBuffer.Stream = capture;
-                FrameBuffer.FPS = capture.GetCaptureProperty(CapProp.Fps);
-                FrameBuffer.FrameSize = new Size(640, 480);
-                Thread framebuffer = new Thread(FrameBuffer.Run);
-                framebuffer.Start();
-                LineProcessing lineProc = new LineProcessing();
-                FrameBuffer.IsRunning = true;
-                while (FrameBuffer.IsRunning)
-                {
-                    var frame = new Mat();
-                    frame = FrameBuffer.GetCurrentFrame();
-                    if (frame == null) continue;
-                    var points = lineProc.ProcessImage(out var timeToProcess);
-                    if (points == null) continue;
-                    Console.WriteLine(timeToProcess);
-                    CvInvoke.Imwrite("bm/output" + count + ".png", points);
-                    count++;
-                }
+                byte[] p = new byte[] { };
+                Thread.Sleep(5000);
+                var image = new Image<Rgb, byte>(p);
+                StartFromFile();
             }
             catch (NullReferenceException excpt)
             {
@@ -58,11 +40,67 @@ namespace DroneSharp
             }
             finally
             {
-                //Console.WriteLine("Total time: " + times.Sum());
-                //Console.WriteLine("Average time: " + times.Average());
-                //Console.WriteLine("Min time: " + times.Min());
-                //Console.WriteLine("Max time: " + times.Max());
                 Console.ReadKey();
+            }
+        }
+
+        private static void StartFromFile()
+        {
+            int count = 0;
+            VideoCapture capture = new VideoCapture(@"C:\Users\bstaf\Downloads/video.v2.mp4");
+            FrameBuffer.Stream = capture;
+            FrameBuffer.FPS = capture.GetCaptureProperty(CapProp.Fps);
+            FrameBuffer.FrameSize = new Size(640, 480);
+            Thread framebuffer = new Thread(FrameBuffer.Run);
+            framebuffer.Start();
+            LineProcessing lineProc = new LineProcessing();
+            FrameBuffer.IsRunning = true;
+            while (FrameBuffer.IsRunning)
+            {
+                var frame = FrameBuffer.GetCurrentFrame();
+                Cluster cl = new Cluster();
+
+                if (frame == null || frame.IsEmpty) continue;
+                using (frame)
+                {
+                    var points = lineProc.ProcessImage(out var timeToProcess);
+                    using (points)
+                    {
+                        if (points == null || points.IsEmpty) continue;
+                        CvInvoke.Imshow("omegalul", points);
+                        CvInvoke.WaitKey(1);
+                        //CvInvoke.Imwrite("bm/output" + count + ".png", frame);
+                    }
+                }
+
+                count++;
+            }
+        }
+
+        private static void StartFromStream()
+        {
+            VideoCapture cam = new VideoCapture(@"C:\Users\bstaf\Documents\GitHub\DroneVision\ParrotStream/bebop.sdp");
+            StreamBuffer.Stream = cam;
+            StreamBuffer.Blur = 3;
+            StreamBuffer.FrameSize = new Size(640,480);
+            Thread streamBuffer = new Thread(StreamBuffer.Run);
+            streamBuffer.Start();
+            LineProcessing lineProc = new LineProcessing();
+            while (StreamBuffer.IsRunning)
+            {
+                var frame = StreamBuffer.GetCurrentFrame();
+                if (frame == null || frame.IsEmpty)continue;
+                using (frame)
+                {
+                    var points = lineProc.ProcessImage(out var timeToProcess);
+                    using (points)
+                    {
+                        if (points == null || points.IsEmpty) continue;
+                        CvInvoke.Imshow("omegalul", points);
+                        CvInvoke.WaitKey(1);
+                        //CvInvoke.Imwrite("bm/output" + count + ".png", frame);
+                    }
+                }
             }
         }
 
