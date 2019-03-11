@@ -25,10 +25,9 @@ namespace DroneSharp.Model
         {
             if (CurrentFrame != null)
             {
-                lock (CurrentFrame)
-                {
-                    return CurrentFrame;
-                } 
+                Mat frame = new Mat();
+                CurrentFrame.CopyTo(frame);
+                return frame;
             }
 
             return null;
@@ -79,7 +78,7 @@ namespace DroneSharp.Model
                     {
                         lock (CurrentFrame)
                         {
-                            CurrentFrame = resizePlusBlur;
+                            resizePlusBlur.CopyTo(CurrentFrame);
                         }
                     }
                     else

@@ -77,7 +77,9 @@ namespace DroneSharp.Model
                             imageWithLines = DrawLines(vector, edges);
                             sw.Stop();
                             timeToProcess = sw.ElapsedMilliseconds;
-                            return imageWithLines;
+                            Mat frame = new Mat();
+                            imageWithLines.CopyTo(frame);
+                            return frame;
                         }
                     }
                     else

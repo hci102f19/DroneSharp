@@ -41,12 +41,11 @@ namespace DroneSharp
                     var frame = new Mat();
                     frame = FrameBuffer.GetCurrentFrame();
                     if (frame == null) continue;
-                    Console.WriteLine("not null");
-                    //var points = lineProc.ProcessImage(out var timeToProcess);
-                    //if (points == null) continue;
-                    //Console.WriteLine(timeToProcess);
-                    //CvInvoke.Imwrite("bm/output" + count + ".png", points);
-                    //count++;
+                    var points = lineProc.ProcessImage(out var timeToProcess);
+                    if (points == null) continue;
+                    Console.WriteLine(timeToProcess);
+                    CvInvoke.Imwrite("bm/output" + count + ".png", points);
+                    count++;
                 }
             }
             catch (NullReferenceException excpt)
