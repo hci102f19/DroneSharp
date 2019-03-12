@@ -25,9 +25,6 @@ namespace DroneSharp
             ProcessHighPrio();
             try
             {
-                byte[] p = new byte[] { };
-                Thread.Sleep(5000);
-                var image = new Image<Rgb, byte>(p);
                 StartFromFile();
             }
             catch (NullReferenceException excpt)
