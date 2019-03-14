@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,8 @@ namespace DroneSharp.Model
             var x2 = width * (1 - ((1 - WidthCenter) / 2));
             var y2 = height * ((1 - ((1 - HeightCenter) / 2)) - HeighOffset);
             Box = new Box(x1,y1,x2,y2);
+            CenterPoint = new MyPoint(x1 +((x2-x1)/2),y1 + ((y2 - y1)/2));
+
         }
 
         public int Width { get; set; }
@@ -27,6 +30,7 @@ namespace DroneSharp.Model
         public int HeightCenter { get; set; }
         public int WidthCenter { get; set; }
         public int HeighOffset { get; set; }
+        public MyPoint CenterPoint { get; set; }
         private Box Box { get; set; }
 
         public void Render(Mat image)

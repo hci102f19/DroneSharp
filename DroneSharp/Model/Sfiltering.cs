@@ -32,7 +32,73 @@ namespace DroneSharp.Model
 
         public void Add(MyPoint point)
         {
+            if (0 > point.Y || point.Y > YMax || 0 > point.X || point.X > XMax)
+            {
+                return;
+            }
 
+            if (Points != null)
+            {
+                Points.Add(point);
+                return;
+            }
+
+            if (!Deviate(point,Points))
+            {
+                Points = Points.Skip(HistorySize - 1).ToList();
+                Points.Add(point);
+                RejectedPoints.Clear();
+            }
+            else
+            {
+                RejectedPoints = RejectedPoints.Skip(HistorySize - 1).ToList();
+                if (RejectedPoints.Count > HistorySize/2 && !Deviate(point,RejectedPoints))
+                {
+                    Console.WriteLine("SETTING NEW POINTS LIST!");
+                    Points.Clear();
+                    foreach (var p in RejectedPoints)
+                    {
+                        Points.Add(p);
+                    }
+                    RejectedPoints.Clear();
+                }
+            }
+        }
+
+        public bool Deviate(MyPoint point, List<MyPoint> list)
+        {
+            var percent = PointToPercent(point);
+            foreach (var p in list)
+            {
+                var lstPercent = PointToPercent(p);
+                if (Math.Abs(lstPercent.X-percent.X)>= DeviationMax || Math.Abs(lstPercent.Y - percent.Y) >= DeviationMax)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public MyPoint GetMean()
+        {
+            var avgPoint = new MyPoint
+            {
+                X = (int)Math.Round(Points.Average(p => p.X)),
+                Y = (int)Math.Round(Points.Average(p => p.Y))
+            };
+            return avgPoint;
+        }
+
+        public MyPoint GetPoint()
+        {
+            if (Points != null)
+            {
+                return GetMean();
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

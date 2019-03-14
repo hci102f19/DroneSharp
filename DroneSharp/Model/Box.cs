@@ -4,8 +4,10 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace DroneSharp.Model
 {
@@ -24,9 +26,17 @@ namespace DroneSharp.Model
         public int X2 { get; set; }
         public int Y2 { get; set; }
 
-        public void Render(Mat image)
+        public void Render(Mat image, MyPoint point = null)
         {
-            CvInvoke.Rectangle(image, new Rectangle(X1,Y1,X2,Y2), new MCvScalar(0,255,0),3);
+            var rect = Rectangle.FromLTRB(X1, Y1, X2, Y2);
+            if (point == null)//todo intersection?
+            {
+                CvInvoke.Rectangle(image, rect, new MCvScalar(0, 255, 0), 3);
+            }
+            else
+            {
+                CvInvoke.Rectangle(image, rect, new MCvScalar(0, 0, 255), 3);
+            }
         }
     }
 
