@@ -19,7 +19,7 @@ namespace DroneSharp.Model
 
         public int Clustersize { get; set; } = 0;
         public List<MyPoint> Points { get; set; }
-        public int Border { get; set; }
+        public int Border { get; set; } = 1;
         public MCvScalar Color { get; set; } 
         public int ClusterDensity { get; set; }
 
@@ -64,7 +64,7 @@ namespace DroneSharp.Model
             CvInvoke.Rectangle(image,new Rectangle(xMin,yMin,xMax,yMax),Color,Border);
         }
 
-        public int Density()
+        public void Density()
         {
             if (Clustersize == 0)
             {
@@ -84,12 +84,35 @@ namespace DroneSharp.Model
                 var yMax = Max(yVals);
 
                 var box = new Box(xMin,yMin,xMax,yMax);
-                //if (box.)
-                //{
-                    
-                //}
 
+                if (box.Area() > 0)
+                {
+                    ClusterDensity = Clustersize * 2 / box.Area();
+                }
+                else
+                {
+                    ClusterDensity = 0;
+                }
             }
+        }
+
+        public Box GetCorners()
+        {
+            List<MyPoint> copyPoints = new List<MyPoint>();
+            Points.CopyTo(copyPoints.ToArray());
+
+            List<int> xVals = new List<int>();
+            List<int> yVals = new List<int>();
+            foreach (var point in copyPoints)
+            {
+                xVals.Add(point.X);
+                yVals.Add(point.Y);
+            }
+            var minX = Min(xVals);
+            var maxX = Max(xVals);
+            var minY = Min(yVals);
+            var maxY = Max(yVals);
+            return new Box(minX, minY, maxX, maxY);
         }
 
 

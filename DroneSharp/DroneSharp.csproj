@@ -82,16 +82,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\Box.cs" />
-    <Compile Include="Model\Centerbox.cs" />
+    <Compile Include="Model\Geometry\Box.cs" />
+    <Compile Include="Model\Geometry\Centerbox.cs" />
     <Compile Include="Model\Exceptions\InvalidLineException.cs" />
     <Compile Include="Model\Exceptions\TooManyLinesException.cs" />
     <Compile Include="Model\Exceptions\TooManyPointsException.cs" />
-    <Compile Include="Model\Line.cs" />
+    <Compile Include="Model\Geometry\Hitbox.cs" />
+    <Compile Include="Model\Geometry\Line.cs" />
+    <Compile Include="Model\Geometry\ReverseHitbox.cs" />
     <Compile Include="Model\LineProcessing.cs" />
     <Compile Include="Model\Cluster.cs" />
     <Compile Include="Model\FrameBuffer.cs" />
-    <Compile Include="Model\MyPoint.cs" />
+    <Compile Include="Model\Geometry\MyPoint.cs" />
     <Compile Include="Model\Sfiltering.cs" />
     <Compile Include="Model\StreamBuffer.cs" />
     <Compile Include="Program.cs" />
