@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DroneSharp.Model.Geometry
+namespace DroneSharp.Model.Containers
 {
-    class ReverseHitbox
+    public class BoxContainer
     {
     }
 }

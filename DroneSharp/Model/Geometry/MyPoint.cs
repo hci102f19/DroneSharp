@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using DroneSharp.Model.DBSCAN;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
 namespace DroneSharp.Model
 {
-    public class MyPoint
+    public class MyPoint : DatasetItemBase
     {
         public MyPoint(int x, int y)
         {
@@ -51,7 +52,6 @@ namespace DroneSharp.Model
                 }
                 else
                 {
-                    CvInvoke.ArrowedLine(image, new Point(0, 0), new Point(X - 3, Y - 3), new MCvScalar(0, 0, 255), 5);
                     CvInvoke.Circle(image, ToPoint(), 5, new MCvScalar(255,255,255), -1);
                     CvInvoke.Circle(image, ToPoint(), 3, new MCvScalar(0, 0, 0), -1);
                 }

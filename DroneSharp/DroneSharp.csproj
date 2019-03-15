@@ -60,6 +60,21 @@
     <Reference Include="Emgu.CV.World, Version=3.4.3.3016, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
       <HintPath>..\packages\EMGU.CV.3.4.3.3016\lib\net35\Emgu.CV.World.dll</HintPath>
     </Reference>
+    <Reference Include="gdalconst_csharp, Version=1.0.6936.30153, Culture=neutral, PublicKeyToken=db5a52b08dc5b321, processorArchitecture=MSIL">
+      <HintPath>..\packages\GDAL.2.3.3\lib\net40\gdalconst_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="gdal_csharp, Version=1.0.6936.30153, Culture=neutral, PublicKeyToken=db5a52b08dc5b321, processorArchitecture=MSIL">
+      <HintPath>..\packages\GDAL.2.3.3\lib\net40\gdal_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="HdbscanSharp, Version=1.0.14.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\HdbscanSharp.1.0.14\lib\net45\HdbscanSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="ogr_csharp, Version=1.0.6936.30152, Culture=neutral, PublicKeyToken=db5a52b08dc5b321, processorArchitecture=MSIL">
+      <HintPath>..\packages\GDAL.2.3.3\lib\net40\ogr_csharp.dll</HintPath>
+    </Reference>
+    <Reference Include="osr_csharp, Version=1.0.6936.30152, Culture=neutral, PublicKeyToken=db5a52b08dc5b321, processorArchitecture=MSIL">
+      <HintPath>..\packages\GDAL.2.3.3\lib\net40\osr_csharp.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework" />
     <Reference Include="RoadTracer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -82,20 +97,28 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GdalConfiguration.cs" />
+    <Compile Include="Model\Containers\BoxContainer.cs" />
+    <Compile Include="Model\Containers\ClusterContainer.cs" />
+    <Compile Include="Model\DBSCAN\ClusterIds.cs" />
+    <Compile Include="Model\DBSCAN\DatasetItemBase.cs" />
+    <Compile Include="Model\DBSCAN\DbScanAlgorithm.cs" />
+    <Compile Include="Model\DBSCAN\DbScanPoint.cs" />
+    <Compile Include="Model\Flight\FlightVector.cs" />
     <Compile Include="Model\Geometry\Box.cs" />
     <Compile Include="Model\Geometry\Centerbox.cs" />
     <Compile Include="Model\Exceptions\InvalidLineException.cs" />
     <Compile Include="Model\Exceptions\TooManyLinesException.cs" />
     <Compile Include="Model\Exceptions\TooManyPointsException.cs" />
-    <Compile Include="Model\Geometry\Hitbox.cs" />
+    <Compile Include="Model\Extended Geometry\Hitbox.cs" />
     <Compile Include="Model\Geometry\Line.cs" />
-    <Compile Include="Model\Geometry\ReverseHitbox.cs" />
+    <Compile Include="Model\Extended Geometry\ReverseHitbox.cs" />
     <Compile Include="Model\LineProcessing.cs" />
-    <Compile Include="Model\Cluster.cs" />
-    <Compile Include="Model\FrameBuffer.cs" />
+    <Compile Include="Model\Extended Geometry\Cluster.cs" />
+    <Compile Include="Model\Buffers\FrameBuffer.cs" />
     <Compile Include="Model\Geometry\MyPoint.cs" />
-    <Compile Include="Model\Sfiltering.cs" />
-    <Compile Include="Model\StreamBuffer.cs" />
+    <Compile Include="Model\Dampening\Sfiltering.cs" />
+    <Compile Include="Model\Buffers\StreamBuffer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -104,6 +127,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="GdalConfiguration.vb" />
     <Content Include="License-LGPL.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
-
+using HdbscanSharp.Distance;
+using HdbscanSharp.Hdbscanstar;
+using HdbscanSharp.Runner;
 namespace DroneSharp.Model
 {
     public class LineProcessing
@@ -180,6 +182,11 @@ namespace DroneSharp.Model
             }
 
             return LineMax < lines.Size;
+        }
+
+        public void Clustering()
+        {
+            
         }
 
     }
