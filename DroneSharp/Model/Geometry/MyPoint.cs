@@ -7,10 +7,12 @@ using System.Drawing;
 using DroneSharp.Model.DBSCAN;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using Accord;
+using Point = System.Drawing.Point;
 
 namespace DroneSharp.Model
 {
-    public class MyPoint : DatasetItemBase
+    public class MyPoint : DatasetItemBase 
     {
         public MyPoint(int x, int y)
         {
@@ -18,13 +20,24 @@ namespace DroneSharp.Model
             Y = y;
         }
 
-        public MyPoint()
+        public MyPoint(Point point)
         {
-            
+            X = point.X;
+            Y = point.Y;
         }
 
-        public int X { get; set; }
-        public int Y { get; set; }
+        public MyPoint()
+        {
+        }
+
+        public MyPoint(float x, float y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public float X { get; set; }
+        public float Y { get; set; }
         public int Threshold { get; set; } = 5;
         public bool IsValid { get; set; } = true;
         public bool IsChecked { get; set; } = false;
@@ -39,7 +52,7 @@ namespace DroneSharp.Model
 
         public Point ToPoint()
         {
-            return new Point(X,Y);
+            return new Point((int) X,(int) Y);
         }
 
         public void Render(Mat image)

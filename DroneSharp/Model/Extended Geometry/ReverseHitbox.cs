@@ -29,29 +29,29 @@ namespace DroneSharp.Model.Geometry
 
             if (!(XMin <= point.X) || !(point.X <= XMax))
             {
-                flightVector.Yaw = CalcHorizontal(point);
+                flightVector.Yaw = (int)CalcHorizontal(point);
             }
 
             if (!(YMin <= point.Y) || !(point.Y <= YMax))
             {
-                flightVector.Gaz = CalcVertical(point);
+                flightVector.Gaz = (int)CalcVertical(point);
             }
 
             return true;
         }
 
-        public int CalcHorizontal(MyPoint point)
+        public float CalcHorizontal(MyPoint point)
         {
             return Clamp(point.X - Center.X / Center.X * 100, 100, -100) * -1;
         }
 
-        public int CalcVertical(MyPoint point)
+        public float CalcVertical(MyPoint point)
         {
             return Clamp(point.Y - Center.Y / Center.Y * 100, 100, -100);
 
         }
 
-        public int Clamp(int input, int max, int min)
+        public float Clamp(float input, int max, int min)
         {
             if (input > max)
             {

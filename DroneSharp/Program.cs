@@ -55,17 +55,22 @@ namespace DroneSharp
             while (FrameBuffer.IsRunning)
             {
                 var frame = FrameBuffer.GetCurrentFrame();
-                Cluster cl = new Cluster();
-
                 if (frame == null || frame.IsEmpty) continue;
                 using (frame)
                 {
                     var points = lineProc.ProcessImage(out var timeToProcess);
                     using (points)
                     {
-                        if (points == null || points.IsEmpty) continue;
-                        CvInvoke.Imshow("omegalul", points);
-                        CvInvoke.WaitKey(1);
+                        if (points == null | points.IsEmpty)
+                        {
+                            Console.WriteLine("null");
+                            continue;
+                        }
+                        else
+                        {
+                            CvInvoke.Imshow("omegalul", points);
+                            CvInvoke.WaitKey(1);
+                        }
                         //CvInvoke.Imwrite("bm/output" + count + ".png", frame);
                     }
                 }

@@ -17,11 +17,11 @@ namespace DroneSharp.Model
             Color = new MCvScalar(r.Next(0,255),r.Next(0,255),r.Next(0,255));
         }
 
-        public int Clustersize { get; set; } = 0;
+        public int Clustersize { get; private set; } = 0;
         public List<MyPoint> Points { get; set; }
         public int Border { get; set; } = 1;
-        public MCvScalar Color { get; set; } 
-        public int ClusterDensity { get; set; }
+        public MCvScalar Color { get; private set; } 
+        public int ClusterDensity { get; private set; }
 
         public void Add(MyPoint point)
         {
@@ -29,12 +29,12 @@ namespace DroneSharp.Model
             Clustersize++;
         }
 
-        public int Min(List<int> vals)
+        public int Min(List<float> vals)
         {
             return (int) Math.Round((double) vals.Min()-(double)Border / 2, 0);
         }
 
-        public int Max(List<int> vals)
+        public int Max(List<float> vals)
         {
             return (int)Math.Round((double)vals.Max() -(double)Border / 2, 0);
 
@@ -44,8 +44,8 @@ namespace DroneSharp.Model
         {
             List<MyPoint> copyPoints = new List<MyPoint>();
             Points.CopyTo(copyPoints.ToArray());
-            List<int> xVals = new List<int>();
-            List<int> yVals = new List<int>();
+            List<float> xVals = new List<float>();
+            List<float> yVals = new List<float>();
             foreach (var point in copyPoints)
             {
                 xVals.Add(point.X);
@@ -70,8 +70,8 @@ namespace DroneSharp.Model
             {
                 List<MyPoint> copyPoints = new List<MyPoint>();
                 Points.CopyTo(copyPoints.ToArray());
-                List<int> xVals = new List<int>();
-                List<int> yVals = new List<int>();
+                List<float> xVals = new List<float>();
+                List<float> yVals = new List<float>();
                 foreach (var point in copyPoints)
                 {
                     xVals.Add(point.X);
@@ -95,14 +95,23 @@ namespace DroneSharp.Model
                 }
             }
         }
+        public MyPoint GetMean()
+        {
+            var avgPoint = new MyPoint
+            {
+                X = (int)Math.Round(Points.Average(p => p.X)),
+                Y = (int)Math.Round(Points.Average(p => p.Y))
+            };
+            return avgPoint;
+        }
 
         public Box GetCorners()
         {
             List<MyPoint> copyPoints = new List<MyPoint>();
             Points.CopyTo(copyPoints.ToArray());
 
-            List<int> xVals = new List<int>();
-            List<int> yVals = new List<int>();
+            List<float> xVals = new List<float>();
+            List<float> yVals = new List<float>();
             foreach (var point in copyPoints)
             {
                 xVals.Add(point.X);

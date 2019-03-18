@@ -37,7 +37,7 @@ namespace DroneSharp.Model
                 return;
             }
 
-            if (Points != null)
+            if (Points.Count == 0)
             {
                 Points.Add(point);
                 return;
@@ -51,7 +51,9 @@ namespace DroneSharp.Model
             }
             else
             {
-                RejectedPoints = RejectedPoints.Skip(HistorySize - 1).ToList();
+                RejectedPoints = RejectedPoints.Take(HistorySize - 1).Reverse().ToList();
+                RejectedPoints.Reverse();
+                RejectedPoints.Add(point);
                 if (RejectedPoints.Count > HistorySize/2 && !Deviate(point,RejectedPoints))
                 {
                     Console.WriteLine("SETTING NEW POINTS LIST!");
@@ -91,7 +93,7 @@ namespace DroneSharp.Model
 
         public MyPoint GetPoint()
         {
-            if (Points != null)
+            if (Points.Count > 0)
             {
                 return GetMean();
             }
