@@ -22,7 +22,7 @@ namespace DroneSharp.Model.Geometry
 
         }
 
-        public bool Hit(MyPoint point, out FlightVector flightVector)
+        public override bool Hit(MyPoint point, out FlightVector flightVector)
         {
             if (Rectangle.IntersectsWith(new Rectangle(point.ToPoint(), new Size(1, 1))))
             {

@@ -12,9 +12,6 @@ using DroneSharp.Model.DBSCAN;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
-using HdbscanSharp.Distance;
-using HdbscanSharp.Hdbscanstar;
-using HdbscanSharp.Runner;
 namespace DroneSharp.Model
 {
     public class LineProcessing
@@ -29,6 +26,9 @@ namespace DroneSharp.Model
         {
             Threshold1 = threshold1;
             Threshold2 = threshold2;
+            Stopwatch = new Stopwatch();
+            Stopwatch.Start();
+            LastTime = Stopwatch.ElapsedMilliseconds;
         }
 
         /// <summary>
@@ -39,6 +39,9 @@ namespace DroneSharp.Model
         {
             Threshold1 = 50;
             Threshold2 = 50;
+            Stopwatch = new Stopwatch();
+            Stopwatch.Start();
+            LastTime = Stopwatch.ElapsedMilliseconds;
         }
 
         private int Threshold1 { get; set; }
@@ -47,8 +50,9 @@ namespace DroneSharp.Model
         public int ThetaModifier { get; set; } = 5;
         public int Theta { get; set; } = 150;
         public int LineMax { get; set; } = 100;
-        public int LastTime { get; set; } = Environment.TickCount;
+        public long LastTime { get; set; }
         public List<Line> LinesList { get; set; }
+        public Stopwatch Stopwatch { get; set; }
 
         /// <summary>
         /// Processes an image from the framebuffer
@@ -96,7 +100,7 @@ namespace DroneSharp.Model
                                 var best = clusterColl.BestClusterAsPoint();
                                 var filteredClusters = FilterCluster(best);
                                 Mat clusters = new Mat();
-                                clusters = DrawClusters(clusterColl, localframe);
+                                clusters = DrawClusters(clusterColl, localframe, filteredClusters);
                                 timeToProcess = sw.ElapsedMilliseconds;
                                 Mat frame = new Mat();
                                 clusters.CopyTo(frame);
@@ -108,7 +112,7 @@ namespace DroneSharp.Model
                             throw new ArgumentNullException("Edges was returned as null");
 
                         }
-                        }
+                    }
                         
                     }
                 }
@@ -117,11 +121,10 @@ namespace DroneSharp.Model
                     throw new ArgumentNullException("Image has not been initialized");
                 }
             }
-            catch (AccessViolationException)
+            catch (Exception ex)
             {
                 Console.WriteLine("Processimage");
-                timeToProcess = 0;
-                return null;
+                throw;
             }
         }
 
@@ -199,97 +202,142 @@ namespace DroneSharp.Model
         /// <returns>A boolean value indicating if number of lines is larger than a specified line max</returns>
         private bool CalculateTheta(VectorOfPointF lines)
         {
-            var modifier = 0;
-            if (Framecount != -1 && lines.Size != 0)
+            try
             {
-                modifier = Framecount / lines.Size;
-                if (modifier <= 0)
+                var modifier = 0;
+                if (Framecount != -1 && lines.Size != 0)
+                {
+                    modifier = Framecount / lines.Size;
+                    if (modifier <= 0)
+                    {
+                        modifier = 1;
+                    }
+                }
+                else
                 {
                     modifier = 1;
                 }
-            }
-            else
-            {
-                modifier = 1;
-            }
 
-            var timestamp = Environment.TickCount;
-            if (timestamp - LastTime > 1/100)
-            {
-                Console.WriteLine("Too slow, increasing theta to: " + Theta);
-                Theta += (int)Math.Round((double)(ThetaModifier * 0.5), 0);
+                var timestamp = Stopwatch.ElapsedMilliseconds;
+                if ((timestamp - LastTime) > 100)
+                {
+                    Console.WriteLine("Too slow, increasing theta to: " + Theta);
+                    Theta += (int)Math.Round((double)(ThetaModifier * 0.5), 0);
+                }
+                else if (lines.Size < 10 && Theta > ThetaModifier)
+                {
+                    Theta -= (int)Math.Round((double)(ThetaModifier * modifier), 0);
+                    Console.WriteLine("Too much data, decreasing theta to: " + Theta);
+                }
+                else if (lines.Size > 50)
+                {
+                    Theta += (int)Math.Round((double)(ThetaModifier * modifier), 0);
+                    Console.WriteLine("Not enough data, increasing theta to: " + Theta);
+                }
+                Framecount = lines.Size;
+                LastTime = timestamp;
+                return LineMax < lines.Size;
             }
-            else if (lines.Size < 10 && Theta > ThetaModifier)
+            catch (Exception)
             {
-                Theta -= (int)Math.Round((double) (ThetaModifier * modifier), 0);
-                Console.WriteLine("Too much data, decreasing theta to: " + Theta);
+                Console.WriteLine("Calc theta");
+                throw;
             }
-            else if(lines.Size > 50)
-            {
-                Theta += (int) Math.Round((double) (ThetaModifier * modifier), 0);
-                Console.WriteLine("Not enough data, increasing theta to: " + Theta);
-            }
-            Framecount = lines.Size;
-            LastTime = timestamp;
-            return LineMax < lines.Size;
         }
 
         public HashSet<MyPoint[]> Clustering()
         {
-            var intersections = GetIntersections();
-            var dbscan = new DbscanAlgorithm<MyPoint>((x, y) =>
-                Math.Sqrt(((x.X - y.X) * (x.X - y.X)) + ((x.Y - y.Y) * (x.Y - y.Y))));
-            var minSamples = (Math.Round(intersections.Count * 0.05, 0));
-            dbscan.ComputeClusterDbscan(intersections.ToArray(), 20,(int) minSamples,out var clusterRes);
-            return clusterRes;
+            try
+            {
+                var intersections = GetIntersections();
+                var dbscan = new DbscanAlgorithm<MyPoint>((x, y) =>
+                    Math.Sqrt(((x.X - y.X) * (x.X - y.X)) + ((x.Y - y.Y) * (x.Y - y.Y))));
+                var minSamples = (Math.Round(intersections.Count * 0.05, 0));
+                dbscan.ComputeClusterDbscan(intersections.ToArray(), 20, (int)minSamples, out var clusterRes);
+                return clusterRes;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Clustering");
+                throw;
+            }
         }
 
         private List<MyPoint> GetIntersections()
         {
-            List<MyPoint> intersections = new List<MyPoint>();
-            foreach (var line in LinesList)
+            try
             {
-                foreach (var innerLine in LinesList)
+                List<MyPoint> intersections = new List<MyPoint>();
+                foreach (var line in LinesList)
                 {
-                    if (line.Equals(innerLine)) continue;
-                    
-                    var pointIntersect = line.GetIntersectionWith(innerLine);
-                    if (pointIntersect != null)
+                    foreach (var innerLine in LinesList)
                     {
-                        intersections.Add(pointIntersect);
+                        if (line.Equals(innerLine)) continue;
+
+                        var pointIntersect = line.GetIntersectionWith(innerLine);
+                        if (pointIntersect != null)
+                        {
+                            intersections.Add(pointIntersect);
+                        }
                     }
                 }
-            }
 
-            return intersections;
+                return intersections;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("GetIntersections");
+                throw;
+            }
         }
 
-        public Mat DrawClusters(ClusterContainer clusterColl, Mat image)
+        public Mat DrawClusters(ClusterContainer clusterColl, Mat image, Sfiltering filteredClusters)
         {
-            var bestClusterPoint = clusterColl.BestClusterAsPoint();
-
-            foreach (var cluster in clusterColl.Clusters)
+            try
             {
-                var randomColor = GetRandomColor();
-                var color = new MCvScalar(randomColor.R,randomColor.G,randomColor.B);
-                foreach (var point in cluster.Points)
+                if (clusterColl == null) throw new ArgumentNullException("clusterColl is null");
+                if (image == null) throw new ArgumentNullException("Image is null");
+                if (filteredClusters == null) throw new ArgumentNullException("filteredClusters is null");
+                foreach (var cluster in clusterColl.Clusters)
                 {
-                    CvInvoke.Circle(image, point.ToPoint(),1, color);
+                    var randomColor = GetRandomColor();
+                    var color = new MCvScalar(randomColor.R, randomColor.G, randomColor.B);
+                    foreach (var point in cluster.Points)
+                    {
+                        CvInvoke.Circle(image, point.ToPoint(), 1, color);
+                    }
+                }
+
+                if (filteredClusters != null)
+                {
+                    CvInvoke.Circle(image, filteredClusters.GetPoint().ToPoint(), 5, new MCvScalar(0, 255, 0), 5);
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Drawcluster " + ex.Message);
+            }
 
-            if (bestClusterPoint != null)
-                CvInvoke.Circle(image, bestClusterPoint.ToPoint(), 5, new MCvScalar(0, 255, 0), 5);
+            if (image == null) throw new ArgumentNullException("IMAGE IS NULL WTF?");
             return image;
         }
 
         private Color GetRandomColor()
         {
-            Random rnd = new Random();
-            Byte[] b = new Byte[3];
-            rnd.NextBytes(b);
-            Color color = Color.FromArgb(b[0], b[1], b[2]);
-            return color;
+            try
+            {
+                Random rnd = new Random();
+                Byte[] b = new Byte[3];
+                rnd.NextBytes(b);
+                Color color = Color.FromArgb(b[0], b[1], b[2]);
+                if(color == null)throw new ArgumentNullException("COLOR IS NULL");
+                return color;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("GetRandomColor");
+                throw;
+            }
         }
 
         public Sfiltering FilterCluster(MyPoint clusters)

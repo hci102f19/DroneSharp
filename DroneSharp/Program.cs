@@ -54,28 +54,35 @@ namespace DroneSharp
             FrameBuffer.IsRunning = true;
             while (FrameBuffer.IsRunning)
             {
-                var frame = FrameBuffer.GetCurrentFrame();
-                if (frame == null || frame.IsEmpty) continue;
-                using (frame)
+                try
                 {
-                    var points = lineProc.ProcessImage(out var timeToProcess);
-                    using (points)
+                    var frame = FrameBuffer.GetCurrentFrame();
+                    if (frame == null || frame.IsEmpty) continue;
+                    using (frame)
                     {
-                        if (points == null | points.IsEmpty)
+                        var points = lineProc.ProcessImage(out var timeToProcess);
+                        using (points)
                         {
-                            Console.WriteLine("null");
-                            continue;
+                            if (points == null | points.IsEmpty)
+                            {
+                                Console.WriteLine("null");
+                                continue;
+                            }
+                            else
+                            {
+                                CvInvoke.Imshow("omegalul", points);
+                                CvInvoke.WaitKey(1);
+                            }
+                            //CvInvoke.Imwrite("bm/output" + count + ".png", frame);
                         }
-                        else
-                        {
-                            CvInvoke.Imshow("omegalul", points);
-                            CvInvoke.WaitKey(1);
-                        }
-                        //CvInvoke.Imwrite("bm/output" + count + ".png", frame);
                     }
-                }
 
-                count++;
+                    count++;
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
             }
         }
 

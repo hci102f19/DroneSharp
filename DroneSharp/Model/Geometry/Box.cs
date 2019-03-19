@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Shapes;
+using DroneSharp.Model.Flight;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Rectangle = System.Drawing.Rectangle;
@@ -63,6 +64,11 @@ namespace DroneSharp.Model
         public int Area()
         {
             return Rectangle.Height * Rectangle.Width;
+        }
+
+        public virtual bool Hit(MyPoint point, out FlightVector flightVector)
+        {
+            throw new NotImplementedException();
         }
     }
 

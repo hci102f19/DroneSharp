@@ -18,7 +18,7 @@ namespace DroneSharp.Model.Geometry
             Y2 = y2;
         }
 
-        public bool Hit(MyPoint point, out FlightVector flightVector)
+        public override bool Hit(MyPoint point, out FlightVector flightVector)
         {
             flightVector = new FlightVector(0,0,0,0,0);
             if (Rectangle.IntersectsWith(new Rectangle(point.ToPoint(), new Size(1, 1))))
