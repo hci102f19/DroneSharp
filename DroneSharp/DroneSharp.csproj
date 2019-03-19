@@ -121,6 +121,8 @@
     <Compile Include="Model\Geometry\MyPoint.cs" />
     <Compile Include="Model\Dampening\Sfiltering.cs" />
     <Compile Include="Model\Buffers\StreamBuffer.cs" />
+    <Compile Include="Model\Vision\BebopVision.cs" />
+    <Compile Include="Model\Vision\DroneVision.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
